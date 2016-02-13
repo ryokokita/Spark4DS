@@ -12,7 +12,6 @@ lazy val root = (project in file(".")).
 		libraryDependencies ++= {Seq(
 			"com.databricks" %% "spark-csv" % "1.3.0",
 			"org.apache.spark" %% "spark-core" % "1.6.0" % "provided",
-			"org.apache.spark" %% "spark-sql" % "1.6.0" % "provided",
-			"org.apache.spark" %% "spark-hive" % "1.6.0" % "provided"
+			"org.apache.spark" %% "spark-sql" % "1.6.0" % "provided"
 		)}
 	)

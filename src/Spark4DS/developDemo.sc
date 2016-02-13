@@ -19,15 +19,16 @@ object developDemo {
   
   // set Spark Configurations & create Spark Context (don't need this if running in spark-shell)
   val conf = new SparkConf().setMaster("local[*]").setAppName("developPrepFlightData")
-                                                  //> conf  : org.apache.spark.SparkConf = org.apache.spark.SparkConf@517cd4b
+                                                  //> conf  : org.apache.spark.SparkConf = org.apache.spark.SparkConf@5fcd892a
   val sc = new SparkContext(conf)                 //> Using Spark's default log4j profile: org/apache/spark/log4j-defaults.propert
                                                   //| ies
-                                                  //| sc  : org.apache.spark.SparkContext = org.apache.spark.SparkContext@a50ae65
+                                                  //| sc  : org.apache.spark.SparkContext = org.apache.spark.SparkContext@6d2d99fc
+                                                  //| 
   sc.setLogLevel("ERROR")
   
   // use Spark Context to set up SQLContext
   val sqlContext = new SQLContext(sc)             //> sqlContext  : org.apache.spark.sql.SQLContext = org.apache.spark.sql.SQLCont
-                                                  //| ext@3ae2ed38
+                                                  //| ext@31133b6e
   
   // import data using spark-csv module (good for dealing with headers & data type inferences)
   val aprilDF = sqlContext.read
@@ -64,56 +65,17 @@ object developDemo {
                                                   //> res0: Array[org.apache.spark.sql.Row] = Array([900,9.0], [900,9.0], [900,9.
                                                   //| 0], [900,9.0], [900,9.0])
   
-  /* shuffle */
-  aprilDF1.groupBy("AIRLINE_ID").count().show()   //> [Stage 3:>                                                          (0 + 2
-                                                  //| ) / 2]                                                                    
-                                                  //|             [Stage 6:==================================>                 
-                                                  //|    (125 + 4) / 199][Stage 6:==============================================
-                                                  //| =>       (173 + 4) / 199]                                                 
-                                                  //|                                +----------+------+
-                                                  //| |AIRLINE_ID| count|
-                                                  //| +----------+------+
-                                                  //| |     20436|  7148|
-                                                  //| |     19690|  6093|
-                                                  //| |     20304| 49329|
-                                                  //| |     19930| 13974|
-                                                  //| |     20355| 32496|
-                                                  //| |     20366| 49296|
-                                                  //| |     21171|  4915|
-                                                  //| |     19977| 41342|
-                                                  //| |     19790| 72170|
-                                                  //| |     19393|106407|
-                                                  //| |     20398| 25695|
-                                                  //| |     19805| 44770|
-                                                  //| |     20409| 22020|
-                                                  //| |     20416|  9496|
-                                                  //| +----------+------+
-                                                  //| 
+  /* shuffle
+  aprilDF1.groupBy("AIRLINE_ID").count().show()
   /* demo of groupBy on PairRDDs */
   // create PairRDD of AIRLINE_ID and count (1)
   val aprilPairRDD = aprilDF.select("AIRLINE_ID").map(id => (id,1))
-                                                  //> aprilPairRDD  : org.apache.spark.rdd.RDD[(org.apache.spark.sql.Row, Int)] =
-                                                  //|  MapPartitionsRDD[30] at map at Spark4DS.developDemo.scala:50
   
   // do a groupBy on PairRDD (causes full shuffle)
   aprilPairRDD.groupByKey().map(t => (t._1, t._2.sum)).collect()
-                                                  //> [Stage 7:>                                                          (0 + 2
-                                                  //| ) / 2][Stage 7:=============================>                             
-                                                  //| (1 + 1) / 2][Stage 8:>                                                    
-                                                  //|       (0 + 2) / 2][Stage 8:=============================>                 
-                                                  //|             (1 + 1) / 2]                                                  
-                                                  //|                               res1: Array[(org.apache.spark.sql.Row, Int)]
-                                                  //|  = Array(([19930],13974), ([20304],49329), ([21171],4915), ([20355],32496),
-                                                  //|  ([19805],44770), ([20416],9496), ([19790],72170), ([20398],25695), ([20436
-                                                  //| ],7148), ([20366],49296), ([19977],41342), ([19393],106407), ([20409],22020
-                                                  //| ), ([19690],6093))
   
   /* demo of reduceBy on same PairRDD */
   // reduceBy does an aggregation first within each partition and then does a partial shuffle
-  aprilPairRDD.reduceByKey(_ + _).collect()       //> [Stage 9:>                                                          (0 + 2
-                                                  //| ) / 2]                                                                    
-                                                  //|             res2: Array[(org.apache.spark.sql.Row, Int)] = Array(([19930],
-                                                  //| 13974), ([20304],49329), ([21171],4915), ([20355],32496), ([19805],44770), 
-                                                  //| ([20416],9496), ([19790],72170), ([20398],25695), ([20436],7148), ([20366],
-                                                  //| 49296), ([19977],41342), ([19393],106407), ([20409],22020), ([19690],6093))
-                                                  //| }
+  aprilPairRDD.reduceByKey(_ + _).collect()
+  */
+}
